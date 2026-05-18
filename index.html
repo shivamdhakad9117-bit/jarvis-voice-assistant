@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS - Voice Assistant App</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cyan: #00f5ff;
+    --blue: #0066ff;
+    --dark: #020810;
+    --darker: #010508;
+    --glow: 0 0 20px #00f5ff88;
+    --glow-strong: 0 0 40px #00f5ffcc;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: #e0f7ff;
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: gridMove 20s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes gridMove {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(50px); }
+  }
+
+  /* Scan line effect */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -100%;
+    left: 0;
+    right: 0;
+    height: 200px;
+    background: linear-gradient(transparent, rgba(0,245,255,0.03), transparent);
+    animation: scan 8s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes scan {
+    0% { top: -200px; }
+    100% { top: 100vh; }
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    padding: 60px 20px 40px;
+  }
+
+  .logo-ring {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 30px;
+    position: relative;
+    animation: rotateSlow 10s linear infinite;
+  }
+
+  .logo-ring svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(var(--glow));
+  }
+
+  @keyframes rotateSlow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .logo-inner {
+    position: absolute;
+    inset: 20px;
+    background: radial-gradient(circle, #001a2e, var(--dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: rotateSlow 10s linear infinite reverse;
+    font-family: 'Orbitron', monospace;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--cyan);
+    text-shadow: var(--glow);
+    letter-spacing: 2px;
+  }
+
+  h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(36px, 8vw, 72px);
+    font-weight: 900;
+    letter-spacing: 8px;
+    color: var(--cyan);
+    text-shadow: var(--glow-strong);
+    animation: flicker 5s infinite;
+  }
+
+  @keyframes flicker {
+    0%, 95%, 100% { opacity: 1; }
+    96% { opacity: 0.8; }
+    97% { opacity: 1; }
+    98% { opacity: 0.9; }
+  }
+
+  .tagline {
+    font-size: 18px;
+    color: #7dd8f0;
+    letter-spacing: 4px;
+    margin-top: 12px;
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+
+  .version-badge {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 4px 16px;
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    font-size: 12px;
+    letter-spacing: 3px;
+    font-family: 'Orbitron', monospace;
+    box-shadow: var(--glow);
+  }
+
+  /* Download button */
+  .download-section {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 48px;
+    background: transparent;
+    border: 2px solid var(--cyan);
+    color: var(--cyan);
+    font-family: 'Orbitron', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-decoration: none;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+    box-shadow: var(--glow), inset 0 0 20px rgba(0,245,255,0.05);
+  }
+
+  .download-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0,245,255,0.2), transparent);
+    transition: left 0.4s;
+  }
+
+  .download-btn:hover::before { left: 100%; }
+
+  .download-btn:hover {
+    background: rgba(0,245,255,0.1);
+    box-shadow: var(--glow-strong), inset 0 0 30px rgba(0,245,255,0.15);
+    transform: translateY(-2px);
+  }
+
+  .download-icon { font-size: 22px; }
+
+  .download-note {
+    margin-top: 14px;
+    font-size: 13px;
+    color: #4a8fa8;
+    letter-spacing: 2px;
+  }
+
+  /* Features */
+  .features {
+    padding: 20px 20px 60px;
+  }
+
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    letter-spacing: 6px;
+    color: var(--cyan);
+    text-align: center;
+    margin-bottom: 40px;
+    opacity: 0.7;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .feature-card {
+    border: 1px solid rgba(0,245,255,0.2);
+    padding: 28px 24px;
+    position: relative;
+    background: rgba(0,245,255,0.02);
+    transition: all 0.3s;
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 40px; height: 2px;
+    background: var(--cyan);
+    box-shadow: var(--glow);
+  }
+
+  .feature-card:hover {
+    border-color: rgba(0,245,255,0.5);
+    background: rgba(0,245,255,0.05);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0,245,255,0.1);
+  }
+
+  .feature-icon {
+    font-size: 32px;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .feature-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--cyan);
+    margin-bottom: 10px;
+  }
+
+  .feature-desc {
+    font-size: 15px;
+    color: #7dd8f0;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* Install steps */
+  .install {
+    padding: 20px 20px 60px;
+    border-top: 1px solid rgba(0,245,255,0.1);
+  }
+
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 16px 20px;
+    border: 1px solid rgba(0,245,255,0.15);
+    background: rgba(0,245,255,0.02);
+  }
+
+  .step-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--cyan);
+    text-shadow: var(--glow);
+    min-width: 36px;
+  }
+
+  .step-text {
+    font-size: 16px;
+    color: #a0d8ef;
+    letter-spacing: 1px;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 30px 20px 50px;
+    border-top: 1px solid rgba(0,245,255,0.1);
+    font-size: 13px;
+    color: #2a5a6e;
+    letter-spacing: 2px;
+  }
+
+  /* Pulse animation on load */
+  .container { animation: fadeIn 1s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo-ring">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="45" stroke="#00f5ff" stroke-width="1" stroke-dasharray="8 4" opacity="0.6"/>
+        <circle cx="50" cy="50" r="35" stroke="#00f5ff" stroke-width="2" stroke-dasharray="20 5"/>
+        <circle cx="50" cy="50" r="25" stroke="#00f5ff" stroke-width="0.5" opacity="0.4"/>
+      </svg>
+      <div class="logo-inner">J</div>
+    </div>
+    <h1>JARVIS</h1>
+    <p class="tagline">Voice Assistant · Smart · Intelligent</p>
+    <span class="version-badge">VERSION 1.0</span>
+  </header>
+
+  <div class="download-section">
+    <a class="download-btn" href="https://github.com/shivamdhakad9117-bit/jarvis-voice-assistant/releases/latest/download/jarvis.apk">
+      <span class="download-icon">⬇</span>
+      DOWNLOAD APK
+    </a>
+    <p class="download-note">ANDROID · FREE · NO ADS</p>
+  </div>
+
+  <div class="features">
+    <p class="section-title">// CORE SYSTEMS</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🎙️</span>
+        <p class="feature-title">VOICE CONTROL</p>
+        <p class="feature-desc">JARVIS style voice commands — control everything hands-free</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">⏰</span>
+        <p class="feature-title">SMART ALARM</p>
+        <p class="feature-desc">Set alarms with your voice — wake up smarter every day</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📋</span>
+        <p class="feature-title">REMINDERS</p>
+        <p class="feature-desc">Never forget anything — intelligent reminder system</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📈</span>
+        <p class="feature-title">HABIT TRACKER</p>
+        <p class="feature-desc">Build good habits — track your daily progress automatically</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="install">
+    <p class="section-title">// INSTALLATION PROTOCOL</p>
+    <div class="steps">
+      <div class="step">
+        <span class="step-num">01</span>
+        <span class="step-text">Download the APK file above</span>
+      </div>
+      <div class="step">
+        <span class="step-num">02</span>
+        <span class="step-text">Open Settings → Allow "Unknown Sources"</span>
+      </div>
+      <div class="step">
+        <span class="step-num">03</span>
+        <span class="step-text">Install the APK file</span>
+      </div>
+      <div class="step">
+        <span class="step-num">04</span>
+        <span class="step-text">Say "Hey JARVIS" and get started! 🚀</span>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    JARVIS APP · BUILT BY SHIVAM · @gro_wth_mins_set
+  </footer>
+
+</div>
+</body>
+</html>
